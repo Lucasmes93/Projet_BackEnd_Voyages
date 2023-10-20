@@ -1,57 +1,56 @@
 from django.contrib.auth.models import User
 from rest_framework.test import APITestCase
 from rest_framework import status
-from .models import UserProfile
+from .models import Destination
 
-class PostsViewSetTests(APITestCase):
+class DestinationsViewSetTests(APITestCase):
     def setUp(self):
         self.superuser = User.objects.create_superuser(username='adminTest', password='azerty123456', email='admintest@test.com')
         self.client.force_authenticate(user=self.superuser)
 
-        self.post_data = {
-            'title': 'Test Post Title',
-            'body': 'Test Post Content'
+        self.destination_data = {
+            'name': 'Test Destination Name',
+            'description': 'Test Destination Description'
         }
 
-        # Changez la ligne suivante pour créer une instance UserProfile
-        self.test_post = UserProfile.objects.create(user=self.superuser, preferences="Préférences de test", budget=1000.00)
+        self.test_destination = Destination.objects.create(**self.destination_data)
 
-    def test_list_posts(self):
-        response = self.client.get('/userprofile/')  # URL mise à jour pour les profils d'utilisateur
+    def test_list_destinations(self):
+        response = self.client.get('http://127.0.0.1:8000/api/destinations/')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreater(len(response.data), 0)
 
-    def test_create_post_authenticated_user(self):
-        response = self.client.post('/userprofile/', self.post_data, format='json')  # URL mise à jour pour les profils d'utilisateur
+    def test_create_destination_authenticated_user(self):
+        response = self.client.post('http://127.0.0.1:8000/api/destinations/', self.destination_data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(UserProfile.objects.count(), 2)
-        self.assertEqual(UserProfile.objects.last().preferences, 'Test Post Content')  # Nom du champ mis à jour
+        self.assertEqual(Destination.objects.count(), 2)
+        self.assertEqual(Destination.objects.last().description, 'Test Destination Description')
 
-    def test_retrieve_post(self):
-        response = self.client.get(f'/userprofile/{self.test_post.id}/')  # URL mise à jour pour les profils d'utilisateur
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['preferences'], 'Préférences de test')  # Nom du champ mis à jour
-
-    def test_partial_update_post_authenticated_user(self):
-        updated_data = {'preferences': 'Préférences de test mises à jour'}  # Nom du champ mis à jour
-        response = self.client.patch(f'/userprofile/{self.test_post.id}/', updated_data, format='json')  # URL mise à jour pour les profils d'utilisateur
+    def test_retrieve_destination(self):
+        response = self.client.get(f'http://127.0.0.1:8000/api/destinations/{self.test_destination.id}/')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.test_post.refresh_from_db()
-        self.assertEqual(self.test_post.preferences, 'Préférences de test mises à jour')  # Nom du champ mis à jour
+        self.assertEqual(response.data['description'], 'Test Destination Description')
 
-    def test_destroy_post_authenticated_user(self):
-        response = self.client.delete(f'/userprofile/{self.test_post.id}/')  # URL mise à jour pour les profils d'utilisateur
+    def test_partial_update_destination_authenticated_user(self):
+        updated_data = {'description': 'Updated Test Destination Description'}
+        response = self.client.patch(f'http://127.0.0.1:8000/api/destinations/{self.test_destination.id}/', updated_data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.test_destination.refresh_from_db()
+        self.assertEqual(self.test_destination.description, 'Updated Test Destination Description')
+
+    def test_destroy_destination_authenticated_user(self):
+        response = self.client.delete(f'http://127.0.0.1:8000/api/destinations/{self.test_destination.id}/')
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        with self.assertRaises(UserProfile.DoesNotExist):
-            UserProfile.objects.get(id=self.test_post.id)
+        with self.assertRaises(Destination.DoesNotExist):
+            Destination.objects.get(id=self.test_destination.id)
 
-    def test_destroy_posts_nonexistent(self):
-        response = self.client.delete('/userprofile/9999/')  # URL mise à jour pour les profils d'utilisateur
+    def test_destroy_destinations_nonexistent(self):
+        response = self.client.delete('http://127.0.0.1:8000/api/destinations/9999/')
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
