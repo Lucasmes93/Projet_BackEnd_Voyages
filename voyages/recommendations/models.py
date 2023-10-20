@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 class UserProfile(models.Model):
     class Meta:
         app_label = 'recommendations'
+        db_table = 'userprofile'
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     preferences = models.TextField()
@@ -29,6 +30,7 @@ class Destination(models.Model):
 class Booking(models.Model):
     class Meta:
         app_label = 'recommendations'
+        db_table = 'bookings'
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     destination = models.ForeignKey(Destination, on_delete=models.CASCADE)
