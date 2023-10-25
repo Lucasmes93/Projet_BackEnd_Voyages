@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'voyages.travel_recommendations',
     'rest_framework_swagger',
     'drf_yasg',
+    'corsheaders',
 ]
 
 REST_FRAMEWORK = dict(DEFAULT_AUTHENTICATION_CLASSES=(
@@ -83,6 +84,11 @@ JWT_AUTH = {
 
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
 }
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:4200',
+]
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -91,6 +97,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'voyages.urls'
